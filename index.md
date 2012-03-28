@@ -3,7 +3,7 @@ layout: default
 title: Barrister RPC
 ---
 
-## Polyglot RPC Made Simple
+## Polyglot RPC Made Easy
 
  * Define your interface in a human readable IDL
  * Run `barrister` to convert IDL to JSON and produce [docco style HTML docs](http://jashkenas.github.com/docco/) for your interface

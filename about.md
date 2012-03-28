@@ -5,24 +5,18 @@ title: Barrister RPC - About
 
 ## Why
 
-A variety of forces are conspiring to make distributed systems more and more commonplace.  
-Consequently we need a way to express the interfaces between the components in our
-systems.  
+I have a crush on interfaces. Thinking about a system in terms of the interfaces it implements is
+the single best way I've found to focus on the 
+[essential complexity](http://en.wikipedia.org/wiki/No_Silver_Bullet) of the system.  Functions
+and data.  No implementation details.
 
-Ideally this tool would:
+My goals for this project are:
 
-* Provide uniform semantics across all supported languages
-* Produce human readable documentation of the interface
-* Produce a computer readable description of the interface
-* Exploit the advantages of the host language, be it static or dynamic
-  * Dynamic languages should be able to produce proxy clients from the interface without a code generation step
-  * Static languages may generate code from interfaces to allow static compilation of servers and clients
-* Work over HTTP by default, but allow plugable transports
-  * ZeroMQ, Redis, and AMQP are all interesting possibilities for the future
-* Serialize via JSON by default, but allow plugable serialization
-  * [MessagePack](http://msgpack.org) is one possibility, as it maps cleanly to JSON data types
-
-My hope is that Barrister becomes a tool that fulfills these requirements.
+* Provide an easy way to document interfaces that both **humans** and **computers** can read
+* Make it easy to get started, but provide enough power to model real systems
+* Be fun and idiomatic to use from dynamic and static languages
+  * No code generator required for dynamic languages
+  * Runtime service discovery can lead to self-configuring clients powered by interface metadata
 
 ## Roadmap
 
@@ -33,7 +27,7 @@ requests and responses comply with that type system.  Future possibilities for d
   * Enhance the IDL to allow expression of required fields, min/max values, regexp, etc
   * JSON Schema is one possibility, although it's a huge spec
 * More transports and serialization formats
-  * Main motivation would be performance.  HTTP/JSON works well for public APIs, but if you want to route requests internally behind a firewall, you might want something faster.
+  * Main motivation would be performance.  HTTP/JSON works well for public APIs, but if you want to route requests internally behind a firewall, you might want something faster.  ZeroMQ+MessagePack is one clear option.
 
 ## Who are You?
 

@@ -40,8 +40,8 @@ And then you run: `barrister -t "Calculator Interface" -d calc.html -j calc.json
 
 You will have:
 
- * [A human readable interface doc](calc.html)
- * [A computer readable JSON file](calc.json)
+ * `calc.html` - [A human readable interface doc](calc.html)
+ * `calc.json` - [A computer readable JSON file](calc.json)
 
 Next you implement your calculator server.  Perhaps you write it in Python with Flask:
 
@@ -53,8 +53,10 @@ Next you implement your calculator server.  Perhaps you write it in Python with 
     import sys
     import json
 
+    # Our implementation of the 'Calculator' interface in the IDL
     class Calculator(object):
 
+        # Parameters match the params in the functions in the IDL
         def add(self, a, b):
             return a+b
 
@@ -63,13 +65,31 @@ Next you implement your calculator server.  Perhaps you write it in Python with 
 
     app = Flask(__name__)
 
-    server = barrister.Server(barrister.contract_from_file(sys.argv[1]))
+    # Load the 'calc.json' file and parse it
+    contract = barrister.contract_from_file(sys.argv[1])
+    
+    # Create a server to wrap this contract
+    server = barrister.Server(contract)
+    
+    # Bind an instance of our class to the "Calculator" interface
     server.add_handler("Calculator", Calculator())
 
+    # This is standard Flask stuff.  Create a function
+    # bound to the "/calc" URL that only accepts POSTs
+    # The implementation is boilerplate for any Barrister server
     @app.route("/calc", methods=["POST"])
     def calc():
+        # Deserialize the request JSON
         req = json.loads(request.data)
+        
+        # server.call will grab the req.method string, unmarshal
+        # the params, invoke the function on the correct handler, and
+        # marshal the results
+        #
+        # resp_data is a dictionary that looks like a JSON-RPC response
         resp_data = server.call(req)
+        
+        # Serialize the response and send it to the client
         resp = make_response(json.dumps(resp_data))
         resp.headers['Content-Type'] = 'application/json'
         return resp
@@ -88,11 +108,20 @@ Then you write a client:
     import barrister
     import sys
     
+    # Create a transport and pass in the endpoint that
+    # the server is bound to
     trans  = barrister.HttpTransport(sys.argv[1])
+    
+    # Create a Barrister client. This will automatically
+    # request the IDL JSON from the server, parse it, and
+    # create proxies for the interfaces/functions defined
+    # in the interface
     client = barrister.Client(trans)
     
+    # Call functions on remote server
+    # Note how Calculator.add is derived from the IDL names
     print "1+5.1=%.1f" % client.Calculator.add(1, 5.1)
-    print "8-1.1=%1.f" % client.Calculator.subtract(8, 1.1)
+    print "8-1.1=%.1f" % client.Calculator.subtract(8, 1.1)
 
 {% endhighlight %}
 
@@ -101,7 +130,7 @@ When you run the client: `python calc_client.py http://localhost:8080/calc`
 You get:
 
     1+5.1=6.1
-    8-1.1=7
+    8-1.1=6.9
 
 ## Nifty, now what?
 

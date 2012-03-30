@@ -5,11 +5,19 @@ title: Barrister RPC
 
 ## Polyglot RPC Made Easy
 
- * Define your interface in a human readable IDL
- * Run `barrister` to convert IDL to JSON and produce [docco style HTML docs](http://jashkenas.github.com/docco/) for your interface
- * Write your server implementation
- * Consume it
+* Define your interface in a human readable IDL
+* Run `barrister` to convert IDL to JSON and produce [docco style HTML docs](http://jashkenas.github.com/docco/) for your interface
+* Write your server implementation
+* Consume it
   
+## What's it good for?
+
+Consider Barrister whenever you're developing a web service that you want to expose internally or 
+externally.  My goal is to provide some of the type safety you get with tools like SOAP, Thrift,
+or Protocol Buffers, but with less tooling.  For example, Barrister doesn't require code generation for
+dynamic languages, but can optionally generate code for languages like Java that benefit from compile
+time checks.
+
 ## Barrister in 3 minutes
 
 Say you write a file called `calc.idl`:

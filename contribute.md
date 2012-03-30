@@ -20,6 +20,18 @@ If you write an article or do a presentation, please send a note about it to the
 [mailing list](https://groups.google.com/forum/#!forum/barrister-rpc).
 Once we have enough articles we'll aggregate them on a page on this site.
 
+### Write docs and tutorials
+
+You can [fork this web site](https://github.com/coopernurse/barrister-site) and add content.
+The site uses [Jekyll](https://github.com/mojombo/jekyll) so please install that to test your changes
+locally.
+
+I'm currently using it to generate a more *traditional* web site comprised of static pages, as 
+opposed to a blog type format.  But that may change as time goes on.  If folks want more temporal
+content we can start using Jekyll's blog features too.
+
+Please use Markdown for all content.
+
 ### Fix a Bug
 
 The [download page](download.html) lists the various GitHub projects related to Barrister.  Please

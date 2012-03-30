@@ -59,7 +59,6 @@ Next you implement your calculator server.  Perhaps you write it in Python with 
     from flask import Flask, request, make_response
     import barrister
     import sys
-    import json
 
     # Our implementation of the 'Calculator' interface in the IDL
     class Calculator(object):
@@ -87,18 +86,13 @@ Next you implement your calculator server.  Perhaps you write it in Python with 
     # The implementation is boilerplate for any Barrister server
     @app.route("/calc", methods=["POST"])
     def calc():
-        # Deserialize the request JSON
-        req = json.loads(request.data)
+        # server.call_json will deserialize its JSON input,
+        # invoke the function on the correct Python handler class,
+        # and serialize the return value back to JSON
+        resp_data = server.call_json(request.data)
         
-        # server.call will grab the req.method string, unmarshal
-        # the params, invoke the function on the correct handler, and
-        # marshal the results
-        #
-        # resp_data is a dictionary that looks like a JSON-RPC response
-        resp_data = server.call(req)
-        
-        # Serialize the response and send it to the client
-        resp = make_response(json.dumps(resp_data))
+        # Send the response back to the client
+        resp = make_response(resp_data)
         resp.headers['Content-Type'] = 'application/json'
         return resp
 

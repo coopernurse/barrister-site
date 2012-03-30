@@ -3,7 +3,6 @@
 from flask import Flask, request, make_response
 import barrister
 import sys
-import json
 
 class Calculator(object):
 
@@ -20,9 +19,8 @@ server.add_handler("Calculator", Calculator())
 
 @app.route("/calc", methods=["POST"])
 def calc():
-    req = json.loads(request.data)
-    resp_data = server.call(req)
-    resp = make_response(json.dumps(resp_data))
+    json_resp = server.call_json(request.data)
+    resp = make_response(json_resp)
     resp.headers['Content-Type'] = 'application/json'
     return resp
 

@@ -17,16 +17,19 @@ time type checking.
 
 Here's a simple IDL example that uses all the primitive types and entities available.
 
+    // Structs contain fields. One per line.
     struct Response {
-        // in milliseconds
+        // fields have an identifier and a type
         elapsedTime int
     }
     
+    // Structs may extend other structs
+    // In this case they inherit the fields of their ancestors
     struct HelloResponse extends Response {
         hello string
     }
     
-    // sorry if your favorite lang isn't here!
+    // Enums are a constrained set of identifiers.
     enum Language {
         java
         csharp
@@ -36,13 +39,29 @@ Here's a simple IDL example that uses all the primitive types and entities avail
     }
     
     struct GitHubProject {
-        id        int
-        owner     string
-        name      string
-        language  Language
-        isPrivate bool
+        id           int
+        owner        string
+        name         string
+        
+        // the [optional] flag means this field 
+        // can be ommitted from requests/responses, 
+        // or may be null
+        //
+        // by default all struct fields and return types
+        // are required and may not be null
+        //
+        description  string   [optional]
+        
+        // Structs may reference structs or enums
+        // But you cannot have cyclical references
+        language     Language
+        
+        isPrivate    bool
     }
     
+    //
+    // Interfaces are collections of functions
+    //
     interface ExampleService {
         // returns the word "hello"
         sayHello() HelloResponse
@@ -54,6 +73,12 @@ Here's a simple IDL example that uses all the primitive types and entities avail
         // stores this project in a db
         // returns the generated ID
         storeProject(project GitHubProject) int
+        
+        // loads a project by id
+        // returns null if no project found
+        // the [optional] flag tells Barrister that
+        // this return type is nullable
+        getProjectById(id int) GitHubProject [optional]
     }
 
 ----
@@ -106,7 +131,6 @@ But you **cannot** redeclare a field that one of your ancestors defined:
     }
     
 Structs may use other structs as field types, but circular references are *not* allowed:
-
     
     struct Animal {
         color Color
@@ -118,6 +142,23 @@ Structs may use other structs as field types, but circular references are *not* 
         // INVALID!
         animalsWithThisColor []Animal
     }
+    
+#### Optional fields
+
+By default all struct fields are required and may not be null. However, you may 
+mark a field as `[optional]`.  Optional fields may be omitted from requests and responses,
+or may be null.  For example:
+
+    struct Person {
+        // These are required:
+        firstName string
+        lastName  string
+        
+        // Email is not required and may be null
+        email     string  [optional]
+    }
+
+Note that top level function parameters are **always** required.  See below.
     
 ### Enums
 
@@ -146,6 +187,37 @@ Each IDL file may define one or more interfaces.  An interface is a collection o
 
 Functions have a name, zero or more parameters, and a return type.  Parameters have a name, and 
 a type.  Parameters and return types may optionally be declared as arrays.
+
+All function parameters are required.  For example, if you have this interface:
+
+    interface Calculator {
+        add(a int, b int) int
+    }
+    
+You may not call it like this:
+
+    # Invalid!  Barrister bindings will reject this call
+    result = client.Calculator.add(3, None)
+    
+If you wish to make parameters optional, define a struct to hold the request fields and mark
+the fields `[optional]` as desired.  For example:
+
+    struct AddRequest {
+        a int
+        b int [optional]
+    }
+    
+    interface Calculator {
+       add(req AddRequest) int
+    }
+    
+Then you can call it like this:
+
+    # Contrived example of course!
+    result = client.Calculator.add({"a": 2})
+    
+    # or:
+    result = client.Calculator.add({"a": 2, "b": None})
 
 ### Comments
 

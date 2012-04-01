@@ -138,7 +138,7 @@ You get:
     
 ## Under the hood
 
-When you call: `client = barrister.Client(trans)`
+When this code executes: `client = barrister.Client(trans)`
 
 A JSON-RPC message is POSTed to `http://localhost:8080/calc` that looks like:
 
@@ -151,15 +151,15 @@ The response looks something like:
     
 The client parses the IDL JSON and uses it to validate outgoing requests against that endpoint.
 
-When you call: `client.Calculator.add(1, 5.1)`
+When this code executes: `client.Calculator.add(1, 5.1)`
 
 A JSON-RPC message is POSTed to `http://localhost:8080/calc` that looks like:
 
     { "jsonrpc": "2.0", "id": "uuid-4-here", "method": "Calculator.add", "params": [1, 5.1] }
     
 The server unpacks the JSON, verifies that the method exists, and validates that the parameter types
-agree with the types defined for the `add()` function on the `Calculator` interface in the IDL.  If they
-do, the method is invoked, and the result is returned as a JSON response that looks like:
+agree with the types defined for the `add()` function on the `Calculator` interface in the IDL.  If 
+validation passes, the method is invoked, and the result is returned as a JSON response that looks like:
 
     { "jsonrpc": "2.0", "id": "id-from-request", "result": 6.1 }
 

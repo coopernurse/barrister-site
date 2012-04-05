@@ -3,10 +3,9 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
     <head>
         <title>{{ page.title }}</title>
-        <link rel="stylesheet" href="/css/960.css" type="text/css" media="screen" />
-        <link rel="stylesheet" href="/css/reset.css" type="text/css" media="screen" />
-        <link rel="stylesheet" href="/css/text.css" type="text/css" media="screen" />
-        <link rel="stylesheet" href="/css/style.css" />
+        <link href="css/bootstrap.spacelab.min.css" rel="stylesheet" />
+        <link href="css/bootstrap-responsive.css" rel="stylesheet" />
+        <link href="css/style.css" rel="stylesheet" />
         <script type="text/javascript">
             var _gaq = _gaq || [];
             _gaq.push(['_setAccount', 'UA-2855697-4']);
@@ -20,35 +19,43 @@
         </script>
     </head>
     <body>
-
-        <div class="container_12">
-            <div class="grid_3 nav">
-                <h2><a href="index.html" class="nav">Barrister RPC</a></h2>
-                <h4>clean contracts</h4>
-            </div>
-            <div class="grid_9">
-                <ul class="nav">
-                    <li><a href="about.html">about</a></li>
-                    <li><a href="docs.html">docs</a></li>
-                    <li><a href="contribute.html">contribute</a></li>
-                    <li><a href="https://groups.google.com/forum/#!forum/barrister-rpc">discuss</a></li>
-                    <li><a href="download.html">download</a></li>
-                </ul>
-            </div>
-            <div class="clear"></div>
-
-            <div class="grid_12">
-            {{ content }}
+        <div class="navbar">
+            <div class="navbar-inner">
+                <div class="container" style="width: auto;">
+                    <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                    </a>
+                    <a class="brand" href="#">Barrister RPC</a>
+                    <div class="nav-collapse">
+                        <ul class="nav">
+                            <li><a href="index.html">Home</a></li>
+                            <li><a href="about.html">About</a></li>
+                            <li><a href="docs.html">Docs</a></li>
+                            <li><a href="contribute.html">Contribute</a></li>
+                            <li><a href="https://groups.google.com/forum/#!forum/barrister-rpc">Discuss</a></li>
+                            <li><a href="download.html">Download</a></li>
+                        </ul>
+                    </div>
+                </div>
             </div>
         </div>
 
-        <script type="text/javascript">
-            var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
-            document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
-        </script>
-        <script type="text/javascript">
-            var pageTracker = _gat._getTracker("UA-2855697-1");
-            pageTracker._trackPageview();
-        </script>
+        <div class="container">
+            <div class="row">
+                <div class="span2">&nbsp;</div>
+                <div class="span8">
+                {{ content }}
+                </div>
+                <div class="span2">&nbsp;</div>
+            </div>
+        </div>
+
+        <script src="js/jquery-1.6.4.min.js"></script>
+        <script src="js/bootstrap-dropdown.js"></script>
+        <script src="js/bootstrap-scrollspy.js"></script>
+        <script src="js/bootstrap-collapse.js"></script>
+        <script src="js/bootstrap-tooltip.js"></script>
     </body>
 </html>

@@ -21,15 +21,35 @@ Then: `pip install barrister`
 
 At that point you should be able to run: `barrister -h`
 
-# Download Language Bindings
+# Language Bindings
 
 The GitHub project for each language includes more detailed information on how to write 
 clients and servers using the binding.
 
-#### Python - [https://github.com/coopernurse/barrister](https://github.com/coopernurse/barrister)
-
-The `barrister` package described above contains the runtime bindings, so that's all you need.
-
-
-#### Java - [https://github.com/coopernurse/barrister-java](https://github.com/coopernurse/barrister-java)
+<table class="table table-bordered table-striped">
+  <tr>
+    <th>Language</th>
+    <th>Source Repo + README</th>
+    <th>Quick Install</th>
+    <th>Notes</th>
+  </tr>
+  <tr>
+    <td>Python</td>
+    <td><a href="https://github.com/coopernurse/barrister">GitHub - barrister</a></td>
+    <td><code>pip install barrister</code></td>
+    <td>Includes core barrister CLI plus Python client/server bindings</td>
+  </tr>
+  <tr>
+    <td>Java</td>
+    <td><a href="https://github.com/coopernurse/barrister-java">GitHub - barrister-java</a></td>
+    <td>See GitHub - Available via Maven</td>
+    <td>Java client/server bindings + code generator</td>
+  </tr>
+  <tr>
+    <td>Javascript / Node.js</td>
+    <td><a href="https://github.com/coopernurse/barrister-js">GitHub - barrister-js</a></td>
+    <td><code>npm install barrister</code></td>
+    <td>Node.js client/server bindings. Web browser client only.</td>
+  </tr>
+</table>
 

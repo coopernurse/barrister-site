@@ -2,3 +2,5 @@
 _site
 node_modules
 examples/*/java/target
+examples/*/*.html
+examples/*/*.json

@@ -152,6 +152,11 @@ def translate_idl(basedir, name):
     cmd = [ "barrister", "-j", "%s.json" % name, "-d", "%s.html" % name, "%s.idl" % name ]
     safe_exec(basedir, cmd)
 
+def run_all_examples():
+    for name in os.listdir("examples"):
+        if os.path.isdir(os.path.join("examples", name)):
+            get_example(name)
+
 def get_example(example):
     example_dir = os.path.join("examples", example)
     data = { }
@@ -204,5 +209,7 @@ def cook(infile, outfile):
 if __name__ == "__main__":
     if len(sys.argv) == 1:
         cook("index.md.tmpl", "index.md")
+    elif sys.argv[1] == "all":
+        run_all_examples()
     else:
         get_example(sys.argv[1])

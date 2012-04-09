@@ -1,0 +1,1 @@
+[{"comment": "", "functions": [{"comment": "if s == \"err\" then server should return \nan error with code=99\n\notherwise it should return s", "returns": {"optional": false, "is_array": false, "type": "string"}, "params": [{"is_array": false, "type": "string", "name": "s"}], "name": "echo"}], "type": "interface", "name": "Echo"}]

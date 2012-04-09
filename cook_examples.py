@@ -74,12 +74,12 @@ section = """
   {{#langs}}
     <div class="tab-pane" id="{{example}}-{{lang}}-server">
 {% highlight {{highlight-lang}} %}
-{{servercode}}
+{{{servercode}}}
 {% endhighlight %}
     </div>
     <div class="tab-pane" id="{{example}}-{{lang}}-client">
 {% highlight {{highlight-lang}} %}
-{{clientcode}}
+{{{clientcode}}}
 {% endhighlight %}
     </div>
   {{/langs}}
@@ -89,6 +89,13 @@ section = """
   </div>
 </div>
 """
+
+def strip_shbang(s):
+    lines = s.split("\n")
+    if lines[0].startswith("#!"):
+        return "\n".join(lines[1:])
+    else:
+        return s
 
 def read_file(fname):
     f = open(fname)
@@ -105,6 +112,11 @@ def run_node(basedir):
     client = Runner(basedir, "%s client" % basedir, [ "node", "client.js" ])
     server = Runner(basedir, "%s server" % basedir, [ "node", "server.js" ])
     return run_lang(client, server, 7667)
+
+def run_php(basedir):
+    client = Runner(basedir, "%s client" % basedir, [ "php", "client.php" ])
+    server = Runner(basedir, "%s server" % basedir, [ "python", "../../../webserver.py" ])
+    return run_lang(client, server, 8080)
 
 def run_java(basedir):
     # generate code from idl
@@ -133,6 +145,8 @@ def run_example(basedir, lang, expected):
         output = run_node(basedir)
     elif lang == "java":
         output = run_java(basedir)
+    elif lang == "php":
+        output = run_php(basedir)
 
     if output != expected:
         print "Failed example: '%s'" % basedir
@@ -175,6 +189,14 @@ def poll_for_port(port, timeout=30):
     raise Exception("timed out trying to connect to port %d" % port)
 
 def get_example(example):
+    lang_to_src = {
+        "python" : { "client" : [ "client.py" ], "server" : [ "server.py" ] },
+        "node" : { "client" : [ "client.js" ], "server" : [ "server.js" ] },
+        "java" : { "client" : [ "src/main/java/example/Client.java" ], 
+                   "server" : [ "src/main/java/example/Server.java" ] },
+        "php" : { "client" : [ "client.php" ], "server" : [ "cgi-bin/server.php" ] }
+    }
+
     example_dir = os.path.join("examples", example)
     data = { }
     data["example"] = example
@@ -192,19 +214,15 @@ def get_example(example):
             if fname == "node":
                 lang["highlight-lang"] = "javascript"
             lang["example"] = example
-            src_path = rel_path
-            if fname == "java":
-                src_path = "%s/src/main/java/example" % rel_path
-            for lang_file in os.listdir(src_path):
-                if lang_file.endswith("~"):
-                    continue
-                lang_file_lower = lang_file.lower()
-                if lang_file_lower.startswith("server"):
-                    lang["servercode"] += read_file(os.path.join(src_path, lang_file))
-                elif lang_file_lower.startswith("client"):
-                    lang["clientcode"] += read_file(os.path.join(src_path, lang_file))
+
+            src_files = lang_to_src[fname]
+            for lang_file in src_files["server"]:
+                lang["servercode"] += strip_shbang(read_file(os.path.join(rel_path, lang_file)))
+            for lang_file in src_files["client"]:
+                lang["clientcode"] += strip_shbang(read_file(os.path.join(rel_path, lang_file)))
+
             data["langs"].append(lang)
-    return pystache.render(section, data)
+    return pystache.render(section, data, escape=lambda u: u)
 
 def cook(infile, outfile):
     f = open(infile)

@@ -6,6 +6,7 @@ import os.path
 import pystache
 import sys
 import time
+import socket
 import threading
 from subprocess import Popen, PIPE
 
@@ -98,23 +99,27 @@ def read_file(fname):
 def run_python(basedir):
     client = Runner(basedir, "%s client" % basedir, [ "python", "client.py" ])
     server = Runner(basedir, "%s server" % basedir, [ "python", "server.py" ])
-    return run_lang(client, server, 1)
+    return run_lang(client, server, 7667)
 
 def run_node(basedir):
     client = Runner(basedir, "%s client" % basedir, [ "node", "client.js" ])
     server = Runner(basedir, "%s server" % basedir, [ "node", "server.js" ])
-    return run_lang(client, server, 1)
+    return run_lang(client, server, 7667)
 
 def run_java(basedir):
     # generate code from idl
     safe_exec(basedir, [ "./codegen.sh" ])
     client = Runner(basedir, "%s client" % basedir, [ "./client.sh" ])
     server = Runner(basedir, "%s server" % basedir, [ "mvn", "clean", "jetty:run" ])
-    return run_lang(client, server, 10)
+    return run_lang(client, server, 8080)
 
-def run_lang(client, server, sleep):
+def run_lang(client, server, port):
     server.start()
-    time.sleep(sleep)
+    try:
+        poll_for_port(port)
+    except:
+        server.stop()
+        sys.exit(1)
     client.start()
     client.join()
     server.stop()
@@ -156,6 +161,18 @@ def run_all_examples():
     for name in os.listdir("examples"):
         if os.path.isdir(os.path.join("examples", name)):
             get_example(name)
+
+def poll_for_port(port, timeout=30):
+    stop = time.time() + timeout
+    while time.time() < stop:
+        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        result = s.connect_ex(('127.0.0.1', port))
+        if result == 0:
+            s.close()
+            return
+        else:
+            time.sleep(.1)
+    raise Exception("timed out trying to connect to port %d" % port)
 
 def get_example(example):
     example_dir = os.path.join("examples", example)

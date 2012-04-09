@@ -1,7 +1,7 @@
 #!/usr/bin/env php
 <?php
 
-$path = $_ENV["PHP_INCLUDE"];
+$path = $_ENV["BARRISTER_PHP"];
 include_once("$path/barrister.php");
 
 class EchoServer {

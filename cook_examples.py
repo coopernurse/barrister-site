@@ -118,6 +118,12 @@ def run_php(basedir):
     server = Runner(basedir, "%s server" % basedir, [ "python", "../../../webserver.py" ])
     return run_lang(client, server, 8080)
 
+def run_ruby(basedir):
+    incl = "-I%s/lib" % os.environ["BARRISTER_RUBY"]
+    client = Runner(basedir, "%s client" % basedir, [ "ruby", "-rubygems", incl, "client.rb" ])
+    server = Runner(basedir, "%s server" % basedir, [ "ruby", "-rubygems", incl, "server.rb", "-p", "7667" ])
+    return run_lang(client, server, 7667)
+
 def run_java(basedir):
     # generate code from idl
     safe_exec(basedir, [ "./codegen.sh" ])
@@ -147,6 +153,8 @@ def run_example(basedir, lang, expected):
         output = run_java(basedir)
     elif lang == "php":
         output = run_php(basedir)
+    elif lang == "ruby":
+        output = run_ruby(basedir)
 
     if output != expected:
         print "Failed example: '%s'" % basedir
@@ -192,6 +200,7 @@ def get_example(example):
     lang_to_src = {
         "python" : { "client" : [ "client.py" ], "server" : [ "server.py" ] },
         "node" : { "client" : [ "client.js" ], "server" : [ "server.js" ] },
+        "ruby" : { "client" : [ "client.rb" ], "server" : [ "server.rb" ] },
         "java" : { "client" : [ "src/main/java/example/Client.java" ], 
                    "server" : [ "src/main/java/example/Server.java" ] },
         "php" : { "client" : [ "client.php" ], "server" : [ "cgi-bin/server.php" ] }
@@ -242,6 +251,11 @@ def cook(infile, outfile):
     f.close()
 
 if __name__ == "__main__":
+    reqenv = [ "BARRISTER_JAVA", "BARRISTER_RUBY", "BARRISTER_PHP" ]
+    for e in reqenv:
+        if not os.environ.has_key(e):
+            print "Set required environment variable: %s" % e
+            sys.exit(1)
     if len(sys.argv) == 1:
         cook("index.md.tmpl", "index.md")
     elif sys.argv[1] == "all":

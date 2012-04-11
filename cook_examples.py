@@ -49,6 +49,11 @@ title: Barrister RPC - Examples
 
 # Examples
 
+Note about the Java server examples: The server classes are simply the interface implementations.
+The code is exposed using the provided `BarristerServlet` class via web.xml.  Examples are run using
+the Maven Jetty plugin.  For more details 
+[see the example source](https://github.com/coopernurse/barrister-site/tree/master/examples/calc/java).
+
 """
 
 section = """

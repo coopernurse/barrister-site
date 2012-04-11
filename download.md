@@ -40,6 +40,12 @@ clients and servers using the binding.
     <td>Includes core barrister CLI plus Python client/server bindings</td>
   </tr>
   <tr>
+    <td>Ruby</td>
+    <td><a href="https://github.com/coopernurse/barrister-ruby">GitHub - barrister-ruby</a></td>
+    <td><code>gem install barrister</code></td>
+    <td>Ruby client/server bindings</td>
+  </tr>
+  <tr>
     <td>Java</td>
     <td><a href="https://github.com/coopernurse/barrister-java">GitHub - barrister-java</a></td>
     <td>See GitHub - Available via Maven</td>
@@ -51,5 +57,12 @@ clients and servers using the binding.
     <td><code>npm install barrister</code></td>
     <td>Node.js client/server bindings. Web browser client only.</td>
   </tr>
+  <tr>
+    <td>PHP</td>
+    <td><a href="https://github.com/coopernurse/barrister-php">GitHub - barrister-php</a></td>
+    <td><code>curl -L -o barrister.php http://bit.ly/IHZBGg</code></td>
+    <td>PHP client/server bindings</td>
+  </tr>
+
 </table>
 

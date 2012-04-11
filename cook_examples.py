@@ -42,6 +42,15 @@ class Runner(threading.Thread):
 
 example_re = re.compile(r"\[\[example-(\w+)\]\]")
 
+example_header ="""---
+layout: default
+title: Barrister RPC - Examples
+---
+
+# Examples
+
+"""
+
 section = """
 <div class="tabbable">
   <ul class="nav nav-tabs">
@@ -180,9 +189,11 @@ def translate_idl(basedir, name):
     safe_exec(basedir, cmd)
 
 def run_all_examples():
+    example_html = { }
     for name in os.listdir("examples"):
         if os.path.isdir(os.path.join("examples", name)):
-            get_example(name)
+            example_html[name] = get_example(name)
+    return example_html
 
 def poll_for_port(port, timeout=30):
     stop = time.time() + timeout
@@ -233,6 +244,17 @@ def get_example(example):
             data["langs"].append(lang)
     return pystache.render(section, data, escape=lambda u: u)
 
+def cook_example_page(examples_html):
+    example_order = [ "calc", "batch" ]
+    f = open("examples.md", "w")
+    f.write(example_header)
+    for key in example_order:
+        f.write(read_file(os.path.join("examples", key, "README.md")))
+        f.write("\n")
+        f.write(examples_html[key])
+        f.write("\n----\n")
+    f.close()
+
 def cook(infile, outfile):
     f = open(infile)
     contents = f.read()
@@ -259,6 +281,6 @@ if __name__ == "__main__":
     if len(sys.argv) == 1:
         cook("index.md.tmpl", "index.md")
     elif sys.argv[1] == "all":
-        run_all_examples()
+        cook_example_page(run_all_examples())
     else:
         get_example(sys.argv[1])

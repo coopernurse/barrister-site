@@ -10,20 +10,59 @@ title: Barrister RPC
 * Write your server implementation
 * Consume it
   
-### What's it good for?
+### Overview
 
-Consider Barrister whenever you're developing a web service that you want to expose internally or 
-externally.  My goal is to provide some of the type safety you get with tools like SOAP, Thrift,
-or Protocol Buffers, but with less tooling.  For example, Barrister doesn't require code generation for
-dynamic languages, but can optionally generate code for languages like Java that benefit from compile
-time checks.
+Barrister is a RPC system that uses an external interface definition (IDL) file to describe the
+interfaces and data structures that a component implements.  It is similar to
+tools like Protocol Buffers, Thrift, Avro, and SOAP.
+
+Barrister emphasizes:
+
+* **Ease of use.**  You should be able to write a client and server in minutes.
+* **Interface as documentation.**  The interface definition should be human readable. The collection
+  of interfaces of a system's components can be an excellent way to understand the system.
+* **Being idiomatic.** Provide code generation for static languages which can enforce type safety 
+  at compile time.  Don't use code generation for dynamic languages.  Language bindings should
+  feel natural for developers of each language.
+* **Interoperability.**  You shouldn't have to worry about whether your Python client will work with
+  a Node.js server.  Barrister has a conformance suite that validates all supported language 
+  bindings enforce the IDL rules uniformly.
 
 RPC calls are encoded as [JSON-RPC 2.0](http://jsonrpc.org/specification) requests/responses.
 
-### Barrister in 3 minutes
+### Example
 
-Say you write a file called `calc.idl`:
 
+<div class="tabbable">
+  <ul class="nav nav-tabs">
+    <li class="active"><a href="#calc-idl" data-toggle="tab">IDL</a></li>
+    <li class="dropdown">
+        <a class="dropdown-toggle" data-toggle="dropdown" href="#">Servers<b class="caret"></b></a>
+        <ul class="dropdown-menu">
+          <li><a href="#calc-java-server" data-toggle="tab">java</a></li>
+          <li><a href="#calc-node-server" data-toggle="tab">node</a></li>
+          <li><a href="#calc-php-server" data-toggle="tab">php</a></li>
+          <li><a href="#calc-python-server" data-toggle="tab">python</a></li>
+          <li><a href="#calc-ruby-server" data-toggle="tab">ruby</a></li>
+          
+        </ul>
+    </li>
+    <li class="dropdown">
+        <a class="dropdown-toggle" data-toggle="dropdown" href="#">Clients<b class="caret"></b></a>
+        <ul class="dropdown-menu">
+          <li><a href="#calc-java-client" data-toggle="tab">java</a></li>
+          <li><a href="#calc-node-client" data-toggle="tab">node</a></li>
+          <li><a href="#calc-php-client" data-toggle="tab">php</a></li>
+          <li><a href="#calc-python-client" data-toggle="tab">python</a></li>
+          <li><a href="#calc-ruby-client" data-toggle="tab">ruby</a></li>
+          
+        </ul>
+    </li>
+    <li><a href="#calc-output" data-toggle="tab">Output</a></li>
+
+  </ul>
+  <div class="tab-content">
+    <div class="tab-pane active" id="calc-idl">
 {% highlight go %}
 //
 // The Calculator service is easy to use.
@@ -44,23 +83,153 @@ interface Calculator {
     // Subtracts b from a and returns the result
     subtract(a float, b float) float
 }
+
 {% endhighlight %}
+    </div>
+  <div class="tab-pane" id="calc-java-server">
+{% highlight java %}
+package example;
 
-And then you run: `barrister -t "Calculator Interface" -d calc.html -j calc.json calc.idl`
+public class Server implements Calculator {
 
-You will have:
+    public Double add(Double a, Double b) {
+        return a+b;
+    }
 
- * `calc.html` - [A human readable interface doc](calc.html)
- * `calc.json` - [A computer readable JSON file](calc.json)
+    public Double subtract(Double a, Double b) {
+        return a-b;
+    }
 
-Next you implement your calculator server.  Perhaps you write it in Python with Flask:
+}
+{% endhighlight %}
+    </div>
+    <div class="tab-pane" id="calc-java-client">
+{% highlight java %}
+package example;
 
+import com.bitmechanic.barrister.HttpTransport;
+
+public class Client {
+
+    public static void main(String argv[]) throws Exception {
+        HttpTransport trans = new HttpTransport("http://127.0.0.1:8080/example/");
+        CalculatorClient calc = new CalculatorClient(trans);
+
+        System.out.println(String.format("1+5.1=%.1f", calc.add(1.0, 5.1)));
+        System.out.println(String.format("8-1.1=%.1f", calc.subtract(8.0, 1.1)));
+    }
+
+}
+{% endhighlight %}
+    </div>
+  <div class="tab-pane" id="calc-node-server">
+{% highlight javascript %}
+var barrister = require('barrister');
+var express   = require('express');
+var fs        = require('fs');
+
+function Calculator() { }
+Calculator.prototype.add = function(a, b, callback) {
+    // first param is for errors
+    callback(null, a+b);
+};
+Calculator.prototype.subtract = function(a, b, callback) {
+    callback(null, a-b);
+};
+
+var idl    = JSON.parse(fs.readFileSync("../calc.json").toString());
+var server = new barrister.Server(idl);
+server.addHandler("Calculator", new Calculator());
+
+var app = express.createServer();
+app.use(express.bodyParser());
+app.post('/calc', function(req, res) {
+    server.handle({}, req.body, function(respJson) {
+        res.contentType('application/json');
+        res.send(respJson);
+    });
+});
+app.listen(7667);
+{% endhighlight %}
+    </div>
+    <div class="tab-pane" id="calc-node-client">
+{% highlight javascript %}
+var barrister = require('barrister');
+
+function checkErr(err) {
+    if (err) {
+        console.log("ERR: " + JSON.stringify(err));
+        process.exit(1);
+    }
+}
+
+var client = barrister.httpClient("http://localhost:7667/calc");
+
+client.loadContract(function(err) {
+    checkErr(err);
+
+    var calc = client.proxy("Calculator");
+
+    calc.add(1, 5.1, function(err, result) {
+        checkErr(err);
+        console.log("1+5.1=" + result);
+
+        calc.subtract(8, 1.1, function(err, result) {
+            checkErr(err);
+            console.log("8-1.1=" + result);
+        });
+    });
+});
+
+{% endhighlight %}
+    </div>
+  <div class="tab-pane" id="calc-php-server">
+{% highlight php %}
+<?php
+
+$path = $_ENV["BARRISTER_PHP"];
+include_once("$path/barrister.php");
+
+class Calculator {
+
+  function add($a, $b) {
+    return $a + $b;
+  }
+
+  function subtract($a, $b) {
+    return $a - $b;
+  }
+
+}
+
+$server = new BarristerServer("../calc.json");
+$server->addHandler("Calculator", new Calculator());
+$server->handleHTTP();
+?>
+{% endhighlight %}
+    </div>
+    <div class="tab-pane" id="calc-php-client">
+{% highlight php %}
+<?php
+
+$path = $_ENV["BARRISTER_PHP"];
+include_once("$path/barrister.php");
+
+$barrister = new Barrister();
+$client    = $barrister->httpClient("http://localhost:8080/cgi-bin/server.php");
+$calc      = $client->proxy("Calculator");
+
+echo sprintf("1+5.1=%.1f\n", $calc->add(1, 5.1));
+echo sprintf("8-1.1=%.1f\n", $calc->subtract(8, 1.1));
+
+?>
+{% endhighlight %}
+    </div>
+  <div class="tab-pane" id="calc-python-server">
 {% highlight python %}
-#!/usr/bin/env python
 
 from flask import Flask, request, make_response
 import barrister
-import sys
 
 # Our implementation of the 'Calculator' interface in the IDL
 class Calculator(object):
@@ -72,116 +241,111 @@ class Calculator(object):
     def subtract(self, a, b):
         return a-b
 
-app = Flask(__name__)
-
-# Load the 'calc.json' file and parse it
-contract = barrister.contract_from_file(sys.argv[1])
-
-# Create a server to wrap this contract
-server = barrister.Server(contract)
-
-# Bind an instance of our class to the "Calculator" interface
+contract = barrister.contract_from_file("../calc.json")
+server   = barrister.Server(contract)
 server.add_handler("Calculator", Calculator())
 
-# This is standard Flask stuff.  Create a function
-# bound to the "/calc" URL that only accepts POSTs
-# The implementation is boilerplate for any Barrister server
+app = Flask(__name__)
+
 @app.route("/calc", methods=["POST"])
 def calc():
-    # server.call_json will deserialize its JSON input,
-    # invoke the function on the correct Python handler class,
-    # and serialize the return value back to JSON
     resp_data = server.call_json(request.data)
-    
-    # Send the response back to the client
     resp = make_response(resp_data)
     resp.headers['Content-Type'] = 'application/json'
     return resp
 
-app.run(host="127.0.0.1", port=8080)
+app.run(host="127.0.0.1", port=7667)
+
 {% endhighlight %}
-
-You start the server and pass in the JSON parsed IDL: `python calc_server.py calc.json`
-
-Then you write a client:
-
+    </div>
+    <div class="tab-pane" id="calc-python-client">
 {% highlight python %}
-#!/usr/bin/env python
 
 import barrister
-import sys
 
-# Create a transport and pass in the endpoint that
-# the server is bound to
-trans  = barrister.HttpTransport(sys.argv[1])
+trans  = barrister.HttpTransport("http://localhost:7667/calc")
 
-# Create a Barrister client. This will automatically
-# request the IDL JSON from the server, parse it, and
-# create proxies for the interfaces/functions defined
-# in the interface
+# automatically connects to endpoint and loads IDL JSON contract
 client = barrister.Client(trans)
 
-# Call functions on remote server
-# Note how Calculator.add is derived from the IDL names
 print "1+5.1=%.1f" % client.Calculator.add(1, 5.1)
 print "8-1.1=%.1f" % client.Calculator.subtract(8, 1.1)
+
 {% endhighlight %}
+    </div>
+  <div class="tab-pane" id="calc-ruby-server">
+{% highlight ruby %}
 
-When you run the client: `python calc_client.py http://localhost:8080/calc`
+require 'sinatra'
+require 'barrister'
 
-You get:
+class Calculator
 
-    1+5.1=6.1
-    8-1.1=6.9
-    
-### Under the hood
+  def add(a, b)
+    return a+b
+  end
 
-When this code executes: `client = barrister.Client(trans)`
+  def subtract(a, b)
+    return a-b
+  end
 
-A JSON-RPC message is POSTed to `http://localhost:8080/calc` that looks like:
+end
 
-    { "jsonrpc": "2.0", "id": "1", "method": "barrister-idl" }
-    
-The server sends back the IDL JSON registered with the `server = barrister.Server(contract)` call.
-The response looks something like:
+contract = Barrister::contract_from_file("../calc.json")
+server   = Barrister::Server.new(contract)
+server.add_handler("Calculator", Calculator.new)
 
-    { "jsonrpc": "2.0", "id": "1", "result": { ... idl json here ... } }
-    
-The client parses the IDL JSON and uses it to validate outgoing requests against that endpoint.
+post '/calc' do
+  request.body.rewind
+  resp = server.handle_json(request.body.read)
+  
+  status 200
+  headers "Content-Type" => "application/json"
+  resp
+end
 
-When this code executes: `client.Calculator.add(1, 5.1)`
+{% endhighlight %}
+    </div>
+    <div class="tab-pane" id="calc-ruby-client">
+{% highlight ruby %}
 
-A JSON-RPC message is POSTed to `http://localhost:8080/calc` that looks like:
+require 'barrister'
 
-    { "jsonrpc": "2.0", "id": "uuid-4-here", "method": "Calculator.add", "params": [1, 5.1] }
-    
-The server unpacks the JSON, verifies that the method exists, and validates that the parameter types
-agree with the types defined for the `add()` function on the `Calculator` interface in the IDL.  If 
-validation passes, the method is invoked, and the result is returned as a JSON response that looks like:
+trans = Barrister::HttpTransport.new("http://localhost:7667/calc")
 
-    { "jsonrpc": "2.0", "id": "id-from-request", "result": 6.1 }
+# automatically connects to endpoint and loads IDL JSON contract
+client = Barrister::Client.new(trans)
 
-If an error occurs, an `error` property replaces the `result`:
+puts "1+5.1=%.1f" % client.Calculator.add(1, 5.1)
+puts "8-1.1=%.1f" % client.Calculator.subtract(8, 1.1)
 
-    { "jsonrpc": "2.0", "id": "id-from-request", 
-      "error" : { "code": -32601, "message": "Unknown function: Calculator.multiply" } }
-      
-Theoretically you could use any JSON-RPC 2.0 client to consume a Barrister service, but you'd lose
-the request/response validation.
+
+{% endhighlight %}
+    </div>
+  
+    <div class="tab-pane" id="calc-output">
+<pre>1+5.1=6.1
+8-1.1=6.9
+</pre>
+    </div>
+  </div>
+</div>
+
+To convert `calc.idl` to JSON and HTML forms, run:
+
+    barrister -t "Calculator Interface" -d calc.html -j calc.json calc.idl
+
+Output files:
+
+ * `calc.html` - [A human readable interface doc](calc.html)
+ * `calc.json` - [A computer readable JSON file](calc.json)
+
+----
 
 ### Nifty, now what?
 
  * [Download](download.html) Barrister and install it
+ * Peruse [more examples](examples.html) of Barrister 
  * Try writing some IDL files to get comfortable with the syntax
  * Join the [mailing list](https://groups.google.com/forum/#!forum/barrister-rpc)
  * [Contribute](contribute.html) to the project by writing a [new language binding](binding.html), a blog article, or a demo app
-
-### Supported languages
-
-* Python
-* Java (with code generator)
-* Javascript (client only)
-
-We need your help!  Please [join the mailing list](https://groups.google.com/forum/#!forum/barrister-rpc) and talk to us about writing a runtime for
-your favorite language.  We have a conformance test suite that we'd like to get all the runtimes
-running under to ensure common behavior.

@@ -29,38 +29,38 @@ clients and servers using the binding.
 <table class="table table-bordered table-striped">
   <tr>
     <th>Language</th>
-    <th>Source Repo + README</th>
-    <th>Quick Install</th>
+    <th>GitHub</th>
+    <th width="50%">Quick Install</th>
     <th>Notes</th>
   </tr>
   <tr>
     <td>Python</td>
-    <td><a href="https://github.com/coopernurse/barrister">GitHub - barrister</a></td>
-    <td><code>pip install barrister</code></td>
+    <td><a href="https://github.com/coopernurse/barrister">barrister</a></td>
+    <td width="50%"><code>pip install barrister</code></td>
     <td>Includes core barrister CLI plus Python client/server bindings</td>
   </tr>
   <tr>
     <td>Ruby</td>
-    <td><a href="https://github.com/coopernurse/barrister-ruby">GitHub - barrister-ruby</a></td>
-    <td><code>gem install barrister</code></td>
+    <td><a href="https://github.com/coopernurse/barrister-ruby">barrister-ruby</a></td>
+    <td width="50%"><code>gem install barrister</code></td>
     <td>Ruby client/server bindings</td>
   </tr>
   <tr>
     <td>Java</td>
-    <td><a href="https://github.com/coopernurse/barrister-java">GitHub - barrister-java</a></td>
-    <td>See GitHub - Available via Maven</td>
+    <td><a href="https://github.com/coopernurse/barrister-java">barrister-java</a></td>
+    <td width="50%">See GitHub - Available via Maven</td>
     <td>Java client/server bindings + code generator</td>
   </tr>
   <tr>
     <td>Javascript / Node.js</td>
-    <td><a href="https://github.com/coopernurse/barrister-js">GitHub - barrister-js</a></td>
-    <td><code>npm install barrister</code></td>
+    <td><a href="https://github.com/coopernurse/barrister-js">barrister-js</a></td>
+    <td width="50%"><code>npm install barrister</code></td>
     <td>Node.js client/server bindings. Web browser client only.</td>
   </tr>
   <tr>
     <td>PHP</td>
-    <td><a href="https://github.com/coopernurse/barrister-php">GitHub - barrister-php</a></td>
-    <td><code>curl -L -o barrister.php http://bit.ly/IHZBGg</code></td>
+    <td><a href="https://github.com/coopernurse/barrister-php">barrister-php</a></td>
+    <td width="50%"><code>curl -L -o barrister.php http://bit.ly/IHZBGg</code></td>
     <td>PHP client/server bindings</td>
   </tr>
 

@@ -18,10 +18,12 @@ batch.Echo.echo("err")
 batch.Echo.echo("batch 2")
 batch.Echo.echo("batch 3")
 
-result = batch.send()
-for i in range(result.count):
-    try:
-        print result.get(i)
-    except barrister.RpcException as e:
-        print "err.code=%d" % e.code
+results = batch.send()
+for res in results:
+    if res.result:
+        print res.result
+    else:
+        # res.error is a barrister.RpcException
+        # you can throw it here if desired
+        print "err.code=%d" % res.error.code
 

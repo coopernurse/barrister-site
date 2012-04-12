@@ -4,3 +4,4 @@ node_modules
 examples/*/java/target
 examples/*/*.html
 examples/*/*.json
+examples/validation/php/content.json

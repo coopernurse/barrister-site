@@ -1,6 +1,5 @@
 #!/usr/bin/env ruby
 
-$LOAD_PATH << File.expand_path('lib', ENV['BARRISTER_RUBY']) if ENV['BARRISTER_RUBY']
 require 'barrister'
 
 trans  = Barrister::HttpTransport.new("http://localhost:7667/batch")

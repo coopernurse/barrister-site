@@ -2,7 +2,6 @@
 function BarristerUI(rootElem) {
     var me = this;
     me.rootElem = rootElem;
-    me.client = new BarristerClient();
 
     var html = "<div class='grid_3'><h3>Functions:</h3></div>";
     html += "<div class='grid_9'><div id='barrister-msg'></div></div>";
@@ -14,9 +13,9 @@ function BarristerUI(rootElem) {
 
     jQuery("#barrister-ui").delegate("a.barrister-func", "click", function() {
         var pos = this.href.lastIndexOf("#");
-        var re = /iface-(\d+)-(\d+)/;
+        var re = /iface-(\S+)/;
         var match = re.exec(this.href.substr(pos+1));
-        var ifaceAndFunc = me.client.getFunctionByOffset(match[1], match[2]);
+        var ifaceAndFunc = me.getFunctionByName(match[1], match[2]);
         me.showFunctionForm(ifaceAndFunc);
         return false;
     });
@@ -30,18 +29,20 @@ function BarristerUI(rootElem) {
         jQuery(this).before(row);
         return false;
     });
-    jQuery("#barrister-main").delegate("form", "submit", function() {
-        var params = me.parseParams(this);  // this == submitted form
+    jQuery("#barrister-main").delegate("#btn-call-func", "click", function() {
+        var params = me.parseParams(jQuery("#form-call-func"));  // this == submitted form
         var method = me.currentIface.name + "." + me.currentFunc.name;
         console.log("params: " + params);
-        me.client.call(method, params, me.onErr, function(resp) {
-            if (resp.result) {
-                var html = "<h3>Result:</h3><pre>" + jQuery.toJSON(resp.result) + "</pre>";
-                me.showMessage("info", me.currentFunc.name);
+        me.showMessage("info", "Executing " + method);
+        me.client.request(method, params, function(err, result) {
+            me.hideMessage();
+            if (result) {
+                var html = "<h3>Result:</h3><pre>" + JSON.stringify(result) + "</pre>";
                 jQuery("#barrister-result").html(html);
+                me.showMessage("success", "Call Successful");
             }
-            else if (resp.error) {
-                me.onErr(resp.error.message);
+            else if (err) {
+                me.onErr(err.message);
             }
         });
         return false;
@@ -102,14 +103,14 @@ BarristerUI.prototype.parseParam = function(key, formValMap, field) {
         return formValMap[key] === "true" || formValMap[key] === "1";
     }
     else {
-        var s = this.client.structs[field.type];
+        var s = this.client.contract.structs[field.type];
         if (s) {
             var m = { };
             this.addStructParams(key, formValMap, s, m);
             return m;
         }
         else {
-            s = this.client.enums[field.type];
+            s = this.client.contract.enums[field.type];
             if (s) {
                 return formValMap[key];
             }
@@ -132,26 +133,43 @@ BarristerUI.prototype.addStructParams = function(key, formValMap, s, m) {
 
 BarristerUI.prototype.loadContract = function(url) {
     var me = this;
-    this.client.loadContract(url, this.onErr, function() {
-        var i, x;
+    me.client = Barrister.httpClient(url);
+    me.client.enableTrace();
+    me.client.loadContract(function(err) {
+        var i, x, name;
         var html = "<ul>";
-        var ifaces = me.client.interfaceNames;
-        for (i = 0; i < ifaces.length; i++) {
-            html += "<li>" + ifaces[i] + "<ul>";
-            var iface = me.client.interfaces[ifaces[i]];
-            var funcs = iface.functions;
-            
-            for (x = 0; x < funcs.length; x++) {
-                var f = funcs[x];
-                html += "<li><a class='barrister-func' href='#iface-" + i + "-" + x + "'>" + f.name + "</a></li>";
+        var ifaces = me.client.contract.interfaces;
+        for (name in ifaces) {
+            if (ifaces.hasOwnProperty(name)) {
+                html += "<li>" + name + "<ul>";
+                var iface = me.client.contract.interfaces[name];
+                var funcs = iface.functions;
+                
+                for (x = 0; x < funcs.length; x++) {
+                    var f = funcs[x];
+                    html += "<li><a class='barrister-func' href='#iface-" + 
+                            name + "." + f.name + "'>" + f.name + "</a></li>";
+                }
+                html += "</ul></li>";
             }
-            html += "</ul></li>";
         }
         html += "</ul>";
         
         jQuery("#barrister-ifaces").html(html);
         me.showMessage("info", "Contract loaded");
     });
+};
+
+BarristerUI.prototype.getFunctionByName = function(method) {
+    var ifaceName, funcName, pos;
+    pos = method.indexOf(".");
+    ifaceName = method.substr(0, pos);
+    funcName  = method.substr(pos+1);
+
+    var o   = { };
+    o.iface = this.client.contract.interfaces[ifaceName];
+    o.func  = this.client.contract.functions[method];
+    return o;
 };
 
 BarristerUI.prototype.showFunctionForm = function(ifaceAndFunc) {
@@ -163,30 +181,41 @@ BarristerUI.prototype.showFunctionForm = function(ifaceAndFunc) {
     
     var html = "";
     if (f.comment) {
+        
         html += "<p class='comment'>" + this.escapeHTML(f.comment) + "</p>";
     }
-    html += "<form><table>";
+    html += "<form class='form-horizontal well' id='form-call-func'><fieldset>";
+    html += "<legend>" + this.escapeHTML(this.currentIface.name + "." + this.currentFunc.name) + "</legend>";
     
     for (i = 0; i < f.params.length; i++) {
         html += this.renderParamRow("param-" + i, f.params[i]);
     }
-    html += "</table>";
-    html += "<input type='submit' value='Call Function' />";
+    html += "</fieldset>";
+    html += "<a href='#' class='btn btn-primary' id='btn-call-func'>Call Function</a>";
     html += "</form>";
     html += "<div id='barrister-result'></div>";
     
-    this.showMessage("info", f.name);
+    this.hideMessage();
     jQuery("#barrister-main").html(html);
 };
 
 BarristerUI.prototype.renderParamRow = function(name, p) {
     this.nameToType[name] = p;
-    var html = this.renderParamHtml(name, p);
-    var type = p.type;
+    var inputHtml = this.renderParamHtml(name, p);
+    var comment = p.type;
     if (p.is_array) {
-        type = "array of " + type;
+        comment = "array of " + p.type;
     }
-    return "<tr><td><span class='pname'>" + p.name + "</span><span class='ptype'>" + type + "</span></td><td>" + html + "</td></tr>";
+
+    var html = "<div class='control-group'>" +
+        "<label class='control-label' for='"+name+"'>"+p.name+"</label>" +
+        "<div class='controls'>" + inputHtml;
+    if (p.comment) {
+        comment += " - " + p.comment;
+    }
+    html += "<p class='help-block'>" + comment + "</p>";
+    html += "</div></div>";
+    return html;
 };
 
 BarristerUI.prototype.renderParamHtml = function(name, p) {
@@ -206,7 +235,7 @@ BarristerUI.prototype.renderParamHtml = function(name, p) {
         html += "</select>";
     }
     else {
-        var s = this.client.structs[p.type];
+        var s = this.client.contract.structs[p.type];
         if (s) {
             html = "<table>";
             for (i = 0; i < s.fields.length; i++) {
@@ -215,7 +244,7 @@ BarristerUI.prototype.renderParamHtml = function(name, p) {
             html += "</table>";
         }
         else {
-            var e = this.client.enums[p.type];
+            var e = this.client.contract.enums[p.type];
             if (e) {
                 html = "<select name='" + name + "'>";
                 for (i = 0; i < e.values.length; i++) {
@@ -230,92 +259,20 @@ BarristerUI.prototype.renderParamHtml = function(name, p) {
         alert("Unknown type: " + p.type);
     }
     
-    if (p.comment) {
-        html += "<br /><p class='comment'>" + this.escapeHTML(p.comment) + "</p>";
-    }
-
     return html;
 };
 
 BarristerUI.prototype.onErr = function(o) {
-    var s = "Error: " + jQuery.toJSON(o);
+    var s = "Error: " + JSON.stringify(o);
     this.showMessage("error", s.substr(0, 80));
 };
 
 BarristerUI.prototype.showMessage = function(type, msg) {
-    var html = "<div class=\"" + type + "\"><h3>" + this.escapeHTML(msg) + "</h3></div>";
+    var html = "<div class=\"alert alert-" + type + "\"><h4>" + this.escapeHTML(msg) + "</h4></div>";
     jQuery("#barrister-msg").html(html);
+    jQuery("#barrister-msg").show();
 };
 
-/////////////////////////////////////////////////////////////////////
-
-function BarristerClient() {
-
-}
-
-BarristerClient.prototype.loadContract = function(url, onErr, onSuccess) {
-    var me = this;
-    this.url = url;
-    this.call("barrister-idl", null, onErr, function(resp) {
-        me.contract = resp.result;
-        me.parseContract();
-        onSuccess();
-    });
-};
-
-BarristerClient.prototype.parseContract = function() {
-    console.log(jQuery.toJSON(this.contract));
-    this.interfaceNames = [ ];
-    this.interfaces = { };
-    this.structs = { };
-    this.enums = { };
-    var i;
-    
-    for (i = 0; i < this.contract.length; i++) {
-        var e = this.contract[i];
-        console.log("Got thing: " + jQuery.toJSON(e));
-        if (e.type === "enum") {
-            this.enums[e.name] = e;
-        }
-        else if (e.type === "struct") {
-            this.structs[e.name] = e;
-        }
-        else if (e.type === "interface") {
-            this.interfaces[e.name] = e;
-            this.interfaceNames.push(e.name);
-        }
-    }
-    
-    console.log("interfaceNames: " + jQuery.toJSON(this.interfaceNames));
-};
-
-BarristerClient.prototype.getFunctionByOffset = function(ifaceOffset, funcOffset) {
-    var ifaceName = this.interfaceNames[ifaceOffset];
-    if (ifaceName) {
-        var iface = this.interfaces[ifaceName];
-        var func  = iface.functions[funcOffset];
-        return { iface: iface, func: func };
-    }
-    else {
-        alert("Invalid offset: " + ifaceOffset + " >= " + this.interfaceNames.length);
-    }
-};
-
-BarristerClient.prototype.call = function(method, params, onErr, onSuccess) {
-    var req = { "jsonrpc": "2.0", "method": method };
-    if (params !== null && params !== undefined) {
-        req.params = params;
-    }
-    
-    console.log("sending post: method=" + method);
-    var settings = {
-        type: "POST",
-        contentType: "application/json",
-        data: jQuery.toJSON(req),
-        error: onErr,
-        success: function(data, textStatus, jqXHR) {
-            onSuccess(data);
-        }
-    };
-    jQuery.ajax(this.url, settings);
+BarristerUI.prototype.hideMessage = function() {
+    jQuery("#barrister-msg").hide();
 };

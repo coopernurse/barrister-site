@@ -29,6 +29,8 @@ Barrister emphasizes:
   bindings enforce the IDL rules uniformly.
 
 RPC calls are encoded as [JSON-RPC 2.0](http://jsonrpc.org/specification) requests/responses.
+Consequently, any JSON-RPC 2.0 client should be able to consume a Barrister RPC service, but Barrister
+clients are preferred as they provide client side type validation and IDL discovery.
 
 ### Example
 
@@ -117,6 +119,13 @@ public class Client {
 
         System.out.println(String.format("1+5.1=%.1f", calc.add(1.0, 5.1)));
         System.out.println(String.format("8-1.1=%.1f", calc.subtract(8.0, 1.1)));
+
+        System.out.println("\nIDL metadata:");
+
+        // BarristerMeta is a Idl2Java generated class in the same package
+        // as the other generated files for this IDL
+        System.out.println("barrister_version=" + BarristerMeta.BARRISTER_VERSION);
+        System.out.println("checksum=" + BarristerMeta.CHECKSUM);
     }
 
 }
@@ -171,12 +180,20 @@ client.loadContract(function(err) {
     var calc = client.proxy("Calculator");
 
     calc.add(1, 5.1, function(err, result) {
+        var i;
         checkErr(err);
         console.log("1+5.1=" + result);
 
         calc.subtract(8, 1.1, function(err, result) {
             checkErr(err);
             console.log("8-1.1=" + result);
+
+            console.log("\nIDL metadata:");
+            meta = client.getMeta();
+            keys = [ "barrister_version", "checksum" ];
+            for (i = 0; i < keys.length; i++) {
+                console.log(keys[i] + "=" + meta[keys[i]]);
+            }
         });
     });
 });
@@ -221,6 +238,13 @@ $calc      = $client->proxy("Calculator");
 
 echo sprintf("1+5.1=%.1f\n", $calc->add(1, 5.1));
 echo sprintf("8-1.1=%.1f\n", $calc->subtract(8, 1.1));
+
+echo "\nIDL metadata:\n";
+$meta = $client->getMeta();
+$keys = array("barrister_version", "checksum");
+foreach ($keys as $i=>$key) {
+  echo "$key=$meta[$key]\n";
+}
 
 ?>
 {% endhighlight %}
@@ -271,6 +295,17 @@ client = barrister.Client(trans)
 print "1+5.1=%.1f" % client.Calculator.add(1, 5.1)
 print "8-1.1=%.1f" % client.Calculator.subtract(8, 1.1)
 
+print
+print "IDL metadata:"
+meta = client.get_meta()
+for key in [ "barrister_version", "checksum" ]:
+    print "%s=%s" % (key, meta[key])
+
+# not printing this one because it changes per run, which breaks our
+# very literal 'examples' test harness, but let's verify it exists at least..
+assert meta.has_key("date_generated")
+
+
 {% endhighlight %}
     </div>
   <div class="tab-pane" id="calc-ruby-server">
@@ -319,6 +354,12 @@ client = Barrister::Client.new(trans)
 puts "1+5.1=%.1f" % client.Calculator.add(1, 5.1)
 puts "8-1.1=%.1f" % client.Calculator.subtract(8, 1.1)
 
+puts
+puts "IDL metadata:"
+meta = client.get_meta
+[ "barrister_version", "checksum" ].each do |key|
+    puts "#{key}=#{meta[key]}"
+end
 
 {% endhighlight %}
     </div>
@@ -326,6 +367,10 @@ puts "8-1.1=%.1f" % client.Calculator.subtract(8, 1.1)
     <div class="tab-pane" id="calc-output">
 <pre>1+5.1=6.1
 8-1.1=6.9
+
+IDL metadata:
+barrister_version=0.1.1
+checksum=51a911b5eb0b61fbb9300221d8c37134
 </pre>
     </div>
   </div>

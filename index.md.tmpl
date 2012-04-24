@@ -29,6 +29,8 @@ Barrister emphasizes:
   bindings enforce the IDL rules uniformly.
 
 RPC calls are encoded as [JSON-RPC 2.0](http://jsonrpc.org/specification) requests/responses.
+Consequently, any JSON-RPC 2.0 client should be able to consume a Barrister RPC service, but Barrister
+clients are preferred as they provide client side type validation and IDL discovery.
 
 ### Example
 

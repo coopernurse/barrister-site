@@ -208,12 +208,12 @@ BarristerUI.prototype.renderParamRow = function(name, p) {
     }
 
     var html = "<div class='control-group'>" +
-        "<label class='control-label' for='"+name+"'>"+p.name+"</label>" +
+        "<label class='control-label' for='"+name+"'>"+p.name+" (" + comment + ")</label>" +
         "<div class='controls'>" + inputHtml;
     if (p.comment) {
         comment += " - " + p.comment;
     }
-    html += "<p class='help-block'>" + comment + "</p>";
+    
     html += "</div></div>";
     return html;
 };

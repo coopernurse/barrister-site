@@ -36,13 +36,13 @@ function BarristerUI(rootElem) {
         me.showMessage("info", "Executing " + method);
         me.client.request(method, params, function(err, result) {
             me.hideMessage();
-            if (result) {
+            if (err) {
+                me.onErr(err.message);
+            }
+            else {
                 var html = "<h3>Result:</h3><pre>" + JSON.stringify(result) + "</pre>";
                 jQuery("#barrister-result").html(html);
                 me.showMessage("success", "Call Successful");
-            }
-            else if (err) {
-                me.onErr(err.message);
             }
         });
         return false;

@@ -9,6 +9,10 @@ This page contains links to demos, articles, and other information related to th
 something to add, please [fork this project](https://github.com/coopernurse/barrister-site) and send a 
 pull request with your changes.
 
+### Articles
+
+* [Using Backbone.js with Barrister RPC](http://bitmechanic.com/2012/05/02/backbone-with-barrister-rpc.html)
+
 ### Demos
 
 #### [Generic Client in Javascript](bclient.html)

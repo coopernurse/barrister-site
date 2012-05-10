@@ -11,6 +11,7 @@ import uuid
 import threading
 import signal
 
+# Helper functions to serialize/deserialize the msgpack messages
 def dump_msg(headers, body):
     return msgpack.dumps([ headers, body ])
     
@@ -107,6 +108,12 @@ def start_router():
 class ContactService(object):
 
     def __init__(self, req_context):
+        """
+        req_context is a thread local variable that we use to
+        share out of band context.  In this example we use it
+        to give this class access to the headers on the request,
+        which are used to enforce security rules
+        """
         self.contacts    = { }
         self.req_context = req_context
 
@@ -137,6 +144,9 @@ class ContactService(object):
             return False
             
     def _get_username(self):
+        """
+        Grabs the username from the thread local context
+        """
         headers = self.req_context.headers
         try:
             return headers["username"]
@@ -155,6 +165,7 @@ class ContactService(object):
             raise barrister.RpcException(4000, "Permission Denied for user")
             
 def start_worker():
+    # create a thread local that we can use to store request headers
     req_context = threading.local()
     
     contract = barrister.contract_from_file("../redis-msgpack.json")
@@ -168,6 +179,7 @@ def start_worker():
             (headers, req) = load_msg(raw_msg[1])
             if headers.has_key("reply_to"):
                 tls  = threading.local()
+                # set the headers on the thread local req_context
                 req_context.headers = headers
                 resp = server.call(req)
                 redis_client.lpush(headers["reply_to"], dump_msg(headers, resp))

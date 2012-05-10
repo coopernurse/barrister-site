@@ -250,7 +250,7 @@ def get_example(example):
     return pystache.render(section, data, escape=lambda u: u)
 
 def cook_example_page(examples_html):
-    example_order = [ "calc", "batch", "validation" ]
+    example_order = [ "calc", "batch", "validation", "redis-msgpack" ]
     f = open("examples.md", "w")
     f.write(example_header)
     for key in example_order:

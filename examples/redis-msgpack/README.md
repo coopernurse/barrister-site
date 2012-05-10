@@ -2,10 +2,11 @@
 
 This example shows how you can build multi-tier topologies with Barrister.
 In this fictional example requests originate from the client via HTTP as JSON messages.  
-Our backend is implemented as a set of independent services that use Redis as a broker.
+
+Imagine a backend implemented as a set of independent services that use Redis as a broker.
 For performance, backend messages are encoded using [message pack](http://msgpack.org/).
 
-We want to make sure that only authenticated HTTP clients can put messages on the Redis bus, 
+We want to ensure that only authenticated HTTP clients can put messages on the Redis bus, 
 and we want the backend services to be able to access the username of the user originating the
 request.  To summarize the flow:
 

@@ -255,7 +255,12 @@ writing some clients and servers.
 ## Generating diagrams
 
 `barrister` can optionally use [Graphviz](http://www.graphviz.org/) to generate a diagram based on an
-IDL file.  For example:
+IDL file.  
+
+First, install Graphviz. I tested this using Graphviz 2.28, installed on my Mac using Homebrew.  Make
+sure `dot` is in your PATH, then use the `-p` option to generate a PNG from your `.idl` file.
+
+For example:
 
     barrister -d foo.html -p foo.png -j foo.json foo.idl
     

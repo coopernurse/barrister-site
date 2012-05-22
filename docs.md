@@ -252,6 +252,20 @@ To get a complete list of options, run:  `barrister -h`
 That's honestly about all there is to it.  Once you have the JSON file, you're ready to start
 writing some clients and servers.
 
+## Generating diagrams
+
+`barrister` can optionally use [Graphviz](http://www.graphviz.org/) to generate a diagram based on an
+IDL file.  For example:
+
+    barrister -d foo.html -p foo.png -j foo.json foo.idl
+    
+This will generate a diagram `foo.png`
+
+If you want to override the parameters passed to `dot`, use the `-z` flag.  You probably want to quote
+this parameter.  For example, in bash:
+
+    barrister -z "-Gsize=8,5 -Glayout=twopi" -d foo.html -p foo.png -j foo.json foo.idl
+    
 ----
 
 ## Runtime Considerations

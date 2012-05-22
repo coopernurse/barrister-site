@@ -1,9 +1,9 @@
 ---
 layout: default
-title: Barrister RPC
+title: Barrister RPC - JSON-RPC plus IDL
 ---
 
-# Barrister RPC - Polyglot RPC Made Easy
+# JSON-RPC + IDL = Barrister RPC
 
 * Define your interface in a human readable IDL
 * Run `barrister` to convert IDL to JSON and produce [docco style HTML docs](http://jashkenas.github.com/docco/) for your interface

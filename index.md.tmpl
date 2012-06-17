@@ -39,6 +39,10 @@ clients are preferred as they provide client side type validation and IDL discov
 To convert `calc.idl` to JSON and HTML forms, run:
 
     barrister -t "Calculator Interface" -d calc.html -j calc.json calc.idl
+    
+Or use the hosted translator (this will only output the JSON file, not the docs):
+
+    curl --data-binary @calc.idl http://barrister.bitmechanic.com/run > calc.json
 
 Output files:
 

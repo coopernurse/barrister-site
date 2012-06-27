@@ -42,7 +42,7 @@ To convert `calc.idl` to JSON and HTML forms, run:
     
 Or use the hosted translator (this will only output the JSON file, not the docs):
 
-    curl --data-binary @calc.idl http://barrister.bitmechanic.com/run > calc.json
+    curl --data-urlencode idl@calc.idl http://barrister.bitmechanic.com/run > calc.json
 
 Output files:
 

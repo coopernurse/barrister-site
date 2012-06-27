@@ -369,7 +369,7 @@ end
 8-1.1=6.9
 
 IDL metadata:
-barrister_version=0.1.1
+barrister_version=0.1.3
 checksum=51a911b5eb0b61fbb9300221d8c37134
 </pre>
     </div>
@@ -379,6 +379,10 @@ checksum=51a911b5eb0b61fbb9300221d8c37134
 To convert `calc.idl` to JSON and HTML forms, run:
 
     barrister -t "Calculator Interface" -d calc.html -j calc.json calc.idl
+    
+Or use the hosted translator (this will only output the JSON file, not the docs):
+
+    curl --data-urlencode idl@calc.idl http://barrister.bitmechanic.com/run > calc.json
 
 Output files:
 

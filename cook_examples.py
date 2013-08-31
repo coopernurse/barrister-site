@@ -277,6 +277,7 @@ def cook(infile, outfile):
     f.write(s)
     f.close()
 
+
 if __name__ == "__main__":
     reqenv = [ "BARRISTER_JAVA", "BARRISTER_RUBY", "BARRISTER_PHP" ]
     for e in reqenv:

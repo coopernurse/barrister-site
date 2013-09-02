@@ -10,6 +10,7 @@ import json
 import uuid
 import threading
 import signal
+import select
 
 # Helper functions to serialize/deserialize the msgpack messages
 def dump_msg(headers, body):
@@ -95,7 +96,10 @@ def contact():
     return http_resp
 
 def start_router():
-    app.run(host="127.0.0.1", port=7667)
+    try:
+        app.run(host="127.0.0.1", port=7667)
+    except select.error:
+        pass
 
 ###############################################################
 # Worker -- This is the Barrister Server process.  It polls

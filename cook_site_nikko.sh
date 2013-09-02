@@ -1,5 +1,7 @@
 #!/bin/sh
+
 set -e
+
 export GH=/home/james/github
 export BARRISTER=$GH/barrister
 export BARRISTER_JAVA=$GH/barrister-java
@@ -11,6 +13,8 @@ export NODE_PATH=/usr/local/lib/node_modules:$BARRISTER/node_modules
 
 export JAVA_HOME=/usr/local/java
 export PATH=$BARRISTER/bin:$BARRISTER_JAVA:/usr/local/bin:$PATH:/home/james/github/barrister-site:$JAVA_HOME/bin:/usr/local/maven/bin
+
+git pull
 
 . $BARRISTER/env/bin/activate
 pip install -r $BARRISTER/requirements.txt

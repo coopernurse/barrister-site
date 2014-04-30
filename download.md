@@ -17,7 +17,7 @@ do things like uninstall, so we encourage using [pip](http://pypi.python.org/pyp
 
 To install pip, run:  `easy_install pip`
 
-Then: `pip install barrister`
+Then: `pip install --pre barrister`
 
 At that point you should be able to run: `barrister -h`
 
@@ -36,7 +36,7 @@ clients and servers using the binding.
   <tr>
     <td>Python</td>
     <td><a href="https://github.com/coopernurse/barrister">barrister</a></td>
-    <td width="50%"><code>pip install barrister</code></td>
+    <td width="50%"><code>pip install --pre barrister</code></td>
     <td>Includes core barrister CLI plus Python client/server bindings</td>
   </tr>
   <tr>
